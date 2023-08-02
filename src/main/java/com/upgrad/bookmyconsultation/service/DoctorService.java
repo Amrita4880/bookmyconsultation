@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import springfox.documentation.annotations.Cacheable;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -31,9 +28,32 @@ public class DoctorService {
 	@Autowired
 	private AddressRepository addressRepository;
 
+	public Doctor register(Doctor doctor){
+		ValidationUtils validationUtils = new ValidationUtils();
+		try{
+			validationUtils.validate(doctor);
+
+			if(doctor.getAddress() == null) {
+				throw new InvalidInputException(new ArrayList<>());
+			}
+		} catch (InvalidInputException e) {
+			throw new RuntimeException(e);
+		}
+
+		doctor.setId(UUID.randomUUID().toString());
+
+		if(doctor.getSpeciality() == null){
+			doctor.setSpeciality(Speciality.GENERAL_PHYSICIAN);
+		}
+
+		Address savedAddress = addressRepository.save(doctor.getAddress());
+		doctor.setAddress(savedAddress);
+
+		Doctor savedDoctor = doctorRepository.save(doctor);
+		return savedDoctor;
+	}
 	
-	
-	//create a method register with return type and parameter of typeDoctor
+	//create a method register with return type and parameter of type Doctor
 	//declare InvalidInputException for the method
 		//validate the doctor details
 		//if address is null throw InvalidInputException
@@ -46,7 +66,13 @@ public class DoctorService {
 		//save the doctor object to the database
 		//return the doctor object
 	
-	
+	public Doctor getDoctor(String id){
+		 Optional<Doctor> doctor = doctorRepository.findById(id);
+		if(doctor.get() != null)
+			return doctor.get();
+		else
+			throw new ResourceUnAvailableException();
+	}
 	//create a method name getDoctor that returns object of type Doctor and has a String paramter called id
 		//find the doctor by id
 		//if doctor is found return the doctor

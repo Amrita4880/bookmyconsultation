@@ -35,7 +35,7 @@ public class AppointmentService {
 			throw new RuntimeException(e);
 		}
 		Appointment availableAppointment = appointmentRepository.findByDoctorIdAndTimeSlotAndAppointmentDate(appointment.getDoctorId(), appointment.getTimeSlot(), appointment.getAppointmentDate());
-		if(availableAppointment == null){
+		if(availableAppointment != null){
 			throw new SlotUnavailableException();
 		} else {
 			Appointment savedAppointment = appointmentRepository.save(appointment);
